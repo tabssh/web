@@ -4,10 +4,13 @@
 
 ## About
 
-TabSSH Web is the server component of the TabSSH ecosystem — a self-hosted
-web application for managing SSH connection profiles, identities, and
-organization-shared vaults, with server-blind end-to-end encrypted sync to
-the TabSSH desktop and Android clients.
+TabSSH Web is the full TabSSH application in your browser — the web sibling
+of TabSSH Android and TabSSH Desktop, and a self-hosted replacement for
+services like Termius and Termix. One self-contained binary gives you tabbed
+SSH/Telnet terminal sessions, SFTP, tunnels, hypervisor and cloud-provider
+management, VNC, and host monitoring, plus the hosting role only a server
+can play: server-blind end-to-end encrypted sync (`TABSSH_SYNC_V2`) and
+device pairing for the native TabSSH apps.
 
 ## Official Site
 
@@ -15,12 +18,43 @@ https://tabssh.github.io
 
 ## Features
 
+- Browser-style tabbed SSH and Telnet sessions — full xterm-256color and
+  true-color terminal, split panes, broadcast input, find-in-scrollback,
+  tmux/screen/zellij auto-attach
+- SSH auth parity with the native apps: password, public key
+  (RSA/ECDSA/Ed25519), keyboard-interactive, OpenSSH certificates,
+  ProxyJump chains, agent forwarding, port knocking; in-app key generation
+  and import (OpenSSH, PEM, PKCS#8, PuTTY)
+- Host key TOFU verification with MITM detection and three trust levels
+- SFTP file browser with remote editing and chmod
+- Port forwarding: local, remote, and dynamic SOCKS5 tunnels that outlive
+  their tabs
+- Hypervisor management: Proxmox VE, XCP-ng/XenServer, Xen Orchestra,
+  VMware ESXi/vCenter, OCI, libvirt/QEMU over SSH — VM power/snapshot ops
+  with serial, VNC, and SPICE consoles as tabs
+- Cloud host import: DigitalOcean, Hetzner, Linode, Vultr, AWS EC2, Google
+  Compute, Azure, OCI
+- Direct VNC hosts and reusable VNC identities
+- Two-tier host monitoring: always-on availability checks plus live-session
+  performance metrics with thresholds, alerts, and a multi-host dashboard
+- Connection profiles, identities, groups, workspaces, snippets, macros,
+  and the shared 23-theme terminal theme set — byte-compatible with the
+  Android and desktop apps
+- Import from `~/.ssh/config`, CSV, JSON, PuTTY .reg, and Terraform `.tf`;
+  portable encrypted backup/restore interchangeable with the native apps
+- Vault security: tiered credential access, auto-lock idle TTL, clipboard
+  auto-clear, in-memory credential zeroing
+- Accessible by design: WCAG 2.1 AA, full keyboard navigation,
+  high-contrast and large-text modes, mobile-responsive UI
 - Multi-user accounts with organization and team support
 - Server-blind, end-to-end encrypted sync of connection vaults
-  (`TABSSH_SYNC_V2`) shared with the TabSSH desktop and Android clients
+  (`TABSSH_SYNC_V2`) shared with the TabSSH desktop and Android clients,
+  with token-based app authentication and QR device pairing
 - Organization-shared vaults with role-based access (member / admin / owner)
+- Opt-in encrypted session recording and replay
 - Full web UI, installable PWA, and JSON API for every feature
-- Single self-contained binary, SQLite by default, zero-config first run
+- Single self-contained binary, SQLite by default, zero-config first run,
+  no telemetry, no feature gating
 
 ## Production
 
