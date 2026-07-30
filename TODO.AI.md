@@ -3,12 +3,15 @@
 Tracking list for work remaining after the PART 0-6 bootstrap pass. AI.md is
 the source of truth for WHAT must be done — this file only tracks it.
 
-## [ ] Finish PART 5 config package (path-security + storage)
-Read: AI.md PART 5
-Implement `normalizePath`, `validatePathSegment`, `validatePath`, `SafePath`,
-`SafeFilePath`, `PathSecurityMiddleware`, the 10-layer middleware ordering,
-the server.yml load/save + defaults pattern, single-instance vs cluster
-source-of-truth logic, and maintenance-mode self-healing retry loop.
+## [x] Finish PART 5 config package (path-security + storage)
+Done — src/config: path.go (normalizePath, validatePathSegment, validatePath,
+SafePath, SafeFilePath, PathSecurityMiddleware — 3rd in the 10-layer chain),
+config.go (server.yml load/save/defaults, 64xxx first-run port, yaml
+migration), store.go (ConfigDatabase hook, single-instance vs cluster
+source-of-truth, 5-min sync, read-only fallback), maintenance.go
+(self-healing retry loop, 503 middleware), types.go; full unit tests.
+Remaining 9 middleware layers belong to PART 11/16/17; ConfigDatabase
+concrete impl belongs to PART 10.
 
 ## [x] Database engine for PART 10 — resolved (user confirmed: in AI.md)
 Read: AI.md PART 10
@@ -83,8 +86,8 @@ Read: AI.md PART 28
 
 ## [ ] Testing & development harness (tests/run_tests.sh, docker.sh, incus.sh)
 Read: AI.md PART 29
-Debt from bootstrap: unit tests for src/paths, src/config (ParseBool), and
-src/mode were not written in the same commit as the code — add them first.
+(Bootstrap test debt cleared — src/paths, src/config ParseBool, and src/mode
+unit tests were added with the PART 5 commit.)
 
 ## [ ] ReadTheDocs / MkDocs documentation
 Read: AI.md PART 30
@@ -108,10 +111,10 @@ Read: AI.md PART 35
 Read: SPEC.md
 Additive to PART 34/35; do not duplicate — implement alongside those PARTs.
 
-## [ ] git init and initial commit
-No `.git` directory exists yet in this project. Bootstrap intentionally does
-not run `git init` or commit — do this in a follow-up session once PART 7+
-implementation begins, per project convention (agents never commit).
+## [x] git init and initial commit
+Done — repo initialized on main, remote https://github.com/tabssh/web
+auto-created by gitcommit; bootstrap commit 0bc82743149e, scope alignment
+commit f0eff4c5f0e4.
 
 Note: PART 36 (Custom Domains) is explicitly NOT ACTIVE per SPEC.md — do not
 scaffold any custom-domain code, tables, routes, or config for this project.
