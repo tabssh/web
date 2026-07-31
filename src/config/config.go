@@ -202,7 +202,34 @@ func detectFQDN() string {
 	if h := os.Getenv("HOSTNAME"); h != "" {
 		return h
 	}
+	if ip := globalUnicastIP(); ip != "" {
+		return ip
+	}
 	return "localhost"
+}
+
+// globalUnicastIP returns the first non-loopback global-unicast IP bound to a
+// local interface, or an empty string when none is found. Per AI.md PART 5 the
+// FQDN resolver prefers a routable global IP over the "localhost" fallback.
+func globalUnicastIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, addr := range addrs {
+		ipNet, ok := addr.(*net.IPNet)
+		if !ok {
+			continue
+		}
+		ip := ipNet.IP
+		if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+			continue
+		}
+		if ip.IsGlobalUnicast() && !ip.IsPrivate() {
+			return ip.String()
+		}
+	}
+	return ""
 }
 
 // Defaults returns the built-in sane defaults for every setting. The port is
