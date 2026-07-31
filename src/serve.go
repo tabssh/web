@@ -74,13 +74,23 @@ func serve(opts *options) int {
 		return 2
 	}
 
-	// Apply mode with the flag > env > config > default priority: FromEnv
-	// applies MODE/DEBUG, then flags override, then config fills the gap.
-	mode.FromEnv()
+	// Mode value priority (PART 6): default < config < MODE env < --mode flag.
+	// Debug priority is separate and ranked lowest-to-highest as: the
+	// MODE/--mode "debug" alias < DEBUG env var < --debug flag. Applying the
+	// mode layers first (the "debug" alias enables debug as a side effect),
+	// then DEBUG env, then --debug, keeps an explicit DEBUG=false from being
+	// clobbered by a --mode debug alias.
+	if cfg.Server.Mode != "" {
+		mode.SetAppMode(cfg.Server.Mode)
+	}
+	if m := os.Getenv("MODE"); m != "" {
+		mode.SetAppMode(m)
+	}
 	if opts.mode != "" {
 		mode.SetAppMode(opts.mode)
-	} else if os.Getenv("MODE") == "" && cfg.Server.Mode != "" {
-		mode.SetAppMode(cfg.Server.Mode)
+	}
+	if d, ok := os.LookupEnv("DEBUG"); ok && d != "" {
+		mode.SetDebugEnabled(config.IsTruthy(d))
 	}
 	if opts.debug {
 		mode.SetDebugEnabled(true)
