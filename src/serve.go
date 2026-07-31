@@ -39,19 +39,19 @@ func serve(opts *options) int {
 	dataDir := runenv.GetDataDir(opts.dataDir, defaults)
 	cacheDir := runenv.GetCacheDir(opts.cacheDir, defaults)
 	logDir := runenv.GetLogDir(opts.logDir, defaults)
-	backupDir := runenv.GetBackupDir(opts.backupDir, dataDir)
+	backupDir := runenv.GetBackupDir(opts.backupDir, defaults)
 	pidPath := runenv.GetPIDFile(opts.pidFile, defaults)
-	dbDir := runenv.GetDatabaseDir(dataDir)
+	dbDir := runenv.GetDatabaseDir(defaults)
 
 	// Create every runtime directory, including the fixed subdirectory
 	// layout for SSL, security, and Tor.
 	dirs := []string{
 		configDir,
-		filepath.Join(configDir, "ssl"),
+		defaults.SSLDir,
 		filepath.Join(configDir, "tor"),
 		dataDir,
 		dbDir,
-		filepath.Join(dataDir, "security"),
+		defaults.SecDir,
 		filepath.Join(dataDir, "tor"),
 		filepath.Join(dataDir, "tor", "site"),
 		cacheDir,

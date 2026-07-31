@@ -84,6 +84,7 @@ func TestResolveDirPriority(t *testing.T) {
 }
 
 func TestGetBackupDirPriority(t *testing.T) {
+	defaults := paths.Dirs{BackupDir: "/default/backup"}
 	tests := []struct {
 		name    string
 		flagVal string
@@ -91,12 +92,13 @@ func TestGetBackupDirPriority(t *testing.T) {
 		want    string
 	}{
 		{"flag wins", "/flag/backup", "/env/backup", "/flag/backup"},
-		{"env wins", "", "/env/backup", "/env/backup"},
+		{"env wins over default", "", "/env/backup", "/env/backup"},
+		{"platform default fallback", "", "", "/default/backup"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("BACKUP_DIR", tt.envVal)
-			if got := GetBackupDir(tt.flagVal, "/data"); got != tt.want {
+			if got := GetBackupDir(tt.flagVal, defaults); got != tt.want {
 				t.Errorf("GetBackupDir(%q) = %q, want %q", tt.flagVal, got, tt.want)
 			}
 		})
@@ -104,14 +106,14 @@ func TestGetBackupDirPriority(t *testing.T) {
 }
 
 func TestGetDatabaseDir(t *testing.T) {
+	defaults := paths.Dirs{DBDir: "/default/db"}
 	t.Setenv("DATABASE_DIR", "/env/db")
-	if got := GetDatabaseDir("/data"); got != "/env/db" {
+	if got := GetDatabaseDir(defaults); got != "/env/db" {
 		t.Errorf("GetDatabaseDir with env = %q, want /env/db", got)
 	}
 	t.Setenv("DATABASE_DIR", "")
-	got := GetDatabaseDir("/data")
-	if got != filepath.Join("/data", "db") && got != "/data/db/sqlite" {
-		t.Errorf("GetDatabaseDir default = %q, want /data/db (native) or /data/db/sqlite (container)", got)
+	if got := GetDatabaseDir(defaults); got != "/default/db" {
+		t.Errorf("GetDatabaseDir default = %q, want /default/db", got)
 	}
 }
 
@@ -153,16 +155,6 @@ func TestEnsurePIDFileDir(t *testing.T) {
 	}
 	if info, err := os.Stat(filepath.Dir(pidPath)); err != nil || !info.IsDir() {
 		t.Errorf("PID parent dir missing: %v", err)
-	}
-}
-
-func TestIsWritable(t *testing.T) {
-	base := t.TempDir()
-	if !isWritable(filepath.Join(base, "newdir")) {
-		t.Error("isWritable() = false for writable temp parent")
-	}
-	if isWritable("/nonexistent-root-path-xyz/sub") {
-		t.Error("isWritable() = true for missing parent")
 	}
 }
 

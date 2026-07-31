@@ -8,16 +8,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strconv"
-	"time"
 
 	"github.com/tabssh/web/src/paths"
-)
-
-const (
-	internalOrg  = "tabssh"
-	internalName = "tabssh"
 )
 
 // resolveDir applies the flag > env > default priority for one directory.
@@ -56,91 +48,29 @@ func GetPIDFile(flagVal string, defaults paths.Dirs) string {
 	return resolveDir(flagVal, "PID_FILE", defaults.PIDFile)
 }
 
-// GetDatabaseDir resolves the database directory: DATABASE_DIR > container
-// default /data/db/sqlite > {data_dir}/db.
-func GetDatabaseDir(dataDir string) string {
+// GetDatabaseDir resolves the database directory: DATABASE_DIR env overrides
+// the platform default. defaults.DBDir already encodes the PART 4 location
+// for every OS/privilege level and the Docker /data/db/sqlite layout, so it
+// is the authoritative default rather than a re-derivation from the data dir.
+func GetDatabaseDir(defaults paths.Dirs) string {
 	if v := os.Getenv("DATABASE_DIR"); v != "" {
 		return v
 	}
-	if paths.IsRunningInDocker() {
-		return "/data/db/sqlite"
-	}
-	return filepath.Join(dataDir, "db")
+	return defaults.DBDir
 }
 
-// GetBackupDir resolves the backup directory: --backup > BACKUP_DIR > the
-// OS system backup location when writable > {data_dir}/backup (elevated) or
-// the per-user backup location.
-func GetBackupDir(flagVal, dataDir string) string {
+// GetBackupDir resolves the backup directory: --backup flag > BACKUP_DIR env
+// > the PART 4 platform default (defaults.BackupDir). The platform default is
+// authoritative and is never probed for writability or re-derived from the
+// data dir — that produced off-spec locations on macOS/Windows/Docker.
+func GetBackupDir(flagVal string, defaults paths.Dirs) string {
 	if flagVal != "" {
 		return flagVal
 	}
 	if v := os.Getenv("BACKUP_DIR"); v != "" {
 		return v
 	}
-	if sys := systemBackupDir(); sys != "" && isWritable(sys) {
-		return sys
-	}
-	if StartedElevated() {
-		return filepath.Join(dataDir, "backup")
-	}
-	return userBackupDir()
-}
-
-// systemBackupDir returns the OS-level shared backup location.
-func systemBackupDir() string {
-	switch runtime.GOOS {
-	case "darwin":
-		return filepath.Join("/Library/Backups", internalOrg, internalName)
-	case "windows":
-		pd := os.Getenv("ProgramData")
-		if pd == "" {
-			return ""
-		}
-		return filepath.Join(pd, "Backups", internalOrg, internalName)
-	case "freebsd", "openbsd", "netbsd", "dragonfly":
-		return filepath.Join("/var/backups", internalOrg, internalName)
-	default:
-		return filepath.Join("/mnt/Backups", internalOrg, internalName)
-	}
-}
-
-// userBackupDir returns the per-user backup location.
-func userBackupDir() string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		home = "."
-	}
-	switch runtime.GOOS {
-	case "darwin":
-		return filepath.Join(home, "Library/Backups", internalOrg, internalName)
-	case "windows":
-		lad := os.Getenv("LOCALAPPDATA")
-		if lad == "" {
-			lad = home
-		}
-		return filepath.Join(lad, "Backups", internalOrg, internalName)
-	default:
-		return filepath.Join(home, ".local/share/Backups", internalOrg, internalName)
-	}
-}
-
-// isWritable reports whether a test file can be created under the parent of
-// path, without requiring path itself to exist yet.
-func isWritable(path string) bool {
-	parent := filepath.Dir(path)
-	info, err := os.Stat(parent)
-	if err != nil || !info.IsDir() {
-		return false
-	}
-	probe := filepath.Join(parent, ".write_test_"+strconv.FormatInt(time.Now().UnixNano(), 36))
-	f, err := os.Create(probe)
-	if err != nil {
-		return false
-	}
-	f.Close()
-	os.Remove(probe)
-	return true
+	return defaults.BackupDir
 }
 
 // EnsureDir creates the directory (with parents) if missing and verifies it
