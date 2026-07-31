@@ -29,6 +29,17 @@ would pass. No caller passes attacker-controlled paths yet (upload/file routes
 are PART 16/17, deferred), so this is latent — add symlink resolution before
 the first user-facing file path reaches it.
 
+## [ ] Reconcile mode.FromEnv with the serve.go inline mode/debug layering (audit finding)
+Read: AI.md PART 6
+
+`mode.FromEnv` (src/mode/mode.go) applies MODE then DEBUG from the environment,
+but `serve()` (src/serve.go) does not call it — it inlines a superset that
+layers config < MODE env < --mode flag < DEBUG env < --debug flag. So FromEnv
+is exercised only by its own unit test and the two code paths can drift. Either
+wire serve.go's env layers through FromEnv (keeping the flag/config layers
+around it) or drop FromEnv once PART 6 mode handling is finalized. Behavior is
+correct today; this is a maintainability/dead-public-API note, not a bug.
+
 ## [ ] Populate remaining `.claude/rules/*.md` files with real content
 Read: AI.md PART 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36
 
