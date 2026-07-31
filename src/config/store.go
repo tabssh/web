@@ -186,16 +186,21 @@ func (m *Manager) writeCacheLocked() error {
 }
 
 // sensitiveSetting reports whether a dotted config key must be excluded from
-// the on-disk cache (credentials NOT cached, per PART 5). Matching is on
-// substrings of the last segment so compound keys such as "secret_key",
-// "api_key", and "private_key" are caught alongside the bare names.
+// the on-disk cache (credentials NOT cached, per PART 5). The credential
+// words are matched as substrings of the last segment so compound keys such
+// as "secret_key" and "smtp_password" are caught. "key" is matched only as a
+// whole segment or a "_key"/"apikey" suffix so non-credential names that merely
+// contain the letters "key" (for example "seo.keywords") are still cached.
 func sensitiveSetting(key string) bool {
 	parts := strings.Split(key, ".")
 	last := strings.ToLower(parts[len(parts)-1])
-	for _, marker := range []string{"password", "passwd", "secret", "token", "apikey", "api_key", "key", "credential", "passphrase"} {
+	for _, marker := range []string{"password", "passwd", "secret", "token", "credential", "passphrase"} {
 		if strings.Contains(last, marker) {
 			return true
 		}
+	}
+	if last == "key" || strings.HasSuffix(last, "_key") || strings.HasSuffix(last, "apikey") {
+		return true
 	}
 	return false
 }

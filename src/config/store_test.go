@@ -136,6 +136,50 @@ func TestSensitiveSettingsNeverCached(t *testing.T) {
 	}
 }
 
+func TestSensitiveSettingClassification(t *testing.T) {
+	sensitive := []string{
+		"smtp.password", "admin.passwd", "session.secret", "api.token",
+		"ssl.key", "letsencrypt.private_key", "provider.apikey",
+		"db.credential", "sync.passphrase",
+	}
+	for _, k := range sensitive {
+		if !sensitiveSetting(k) {
+			t.Errorf("sensitiveSetting(%q) = false, want true", k)
+		}
+	}
+	cacheable := []string{
+		"seo.keywords", "branding.title", "ui.theme", "server.mode",
+		"web.cors", "keyboard.layout",
+	}
+	for _, k := range cacheable {
+		if sensitiveSetting(k) {
+			t.Errorf("sensitiveSetting(%q) = true, want false", k)
+		}
+	}
+}
+
+func TestKeywordsSurviveCache(t *testing.T) {
+	db := newFakeDB()
+	m := testManager(t, db)
+	if err := m.SetSetting(context.Background(), "seo.keywords", []string{"ssh", "web"}); err != nil {
+		t.Fatalf("SetSetting: %v", err)
+	}
+	back, err := Load(m.path)
+	if err != nil {
+		t.Fatalf("load cache file: %v", err)
+	}
+	if back.Cache == nil {
+		t.Fatal("_cache section missing")
+	}
+	seo, ok := back.Cache.Settings["seo"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("seo not cached: %#v", back.Cache.Settings)
+	}
+	if _, ok := seo["keywords"]; !ok {
+		t.Errorf("seo.keywords dropped from cache: %#v", seo)
+	}
+}
+
 func TestDatabaseFailureEntersReadOnly(t *testing.T) {
 	db := newFakeDB()
 	db.settings["branding.title"] = "FromDB"
