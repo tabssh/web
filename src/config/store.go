@@ -186,15 +186,18 @@ func (m *Manager) writeCacheLocked() error {
 }
 
 // sensitiveSetting reports whether a dotted config key must be excluded from
-// the on-disk cache (password NOT cached, per PART 5).
+// the on-disk cache (credentials NOT cached, per PART 5). Matching is on
+// substrings of the last segment so compound keys such as "secret_key",
+// "api_key", and "private_key" are caught alongside the bare names.
 func sensitiveSetting(key string) bool {
 	parts := strings.Split(key, ".")
-	switch parts[len(parts)-1] {
-	case "password", "secret", "token":
-		return true
-	default:
-		return false
+	last := strings.ToLower(parts[len(parts)-1])
+	for _, marker := range []string{"password", "passwd", "secret", "token", "apikey", "api_key", "key", "credential", "passphrase"} {
+		if strings.Contains(last, marker) {
+			return true
+		}
 	}
+	return false
 }
 
 // nestSettings converts flat dotted keys ("branding.title") into the nested
