@@ -513,6 +513,10 @@ server:
   seo:
     keywords: []
 
+  # System user/group (empty = auto-detect the running user and group)
+  user: "%s"
+  group: "%s"
+
   # PID file
   pidfile: true
 
@@ -674,6 +678,8 @@ web:
 		c.Server.APIVersion,
 		c.Server.Branding.Title,
 		c.Server.Branding.Tagline,
+		c.Server.User,
+		c.Server.Group,
 		c.Server.Admin.Email,
 		c.Server.SSL.LetsEncrypt.Email,
 	)
