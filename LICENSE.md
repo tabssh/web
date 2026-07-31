@@ -26,7 +26,14 @@ SOFTWARE.
 
 This software includes the following third-party libraries:
 
-_No dependencies vendored yet — this section will be populated with
-`go-licenses csv ./...` output once `go.mod` gains real dependencies during
-PART 7+ implementation. No GPL/AGPL/LGPL licensed dependency may ever be
-added (see AI.md PART 2)._
+| Library | Version | License | Copyright |
+|---------|---------|---------|-----------|
+| github.com/google/uuid | v1.6.0 | BSD-3-Clause | 2009,2014 Google Inc. |
+| golang.org/x/net | v0.57.0 | BSD-3-Clause | 2009 The Go Authors |
+| golang.org/x/sys | v0.47.0 | BSD-3-Clause | 2009 The Go Authors |
+| golang.org/x/term | v0.45.0 | BSD-3-Clause | 2009 The Go Authors |
+| gopkg.in/yaml.v3 | v3.0.1 | MIT, Apache-2.0 | 2011-2019 Canonical Ltd., Kirill Simonov |
+
+Full license texts available at: https://spdx.org/licenses/
+
+No GPL/AGPL/LGPL licensed dependency may ever be added (see AI.md PART 2).
