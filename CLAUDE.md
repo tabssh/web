@@ -107,4 +107,4 @@ Default to continuing without asking. Ask only when:
 - Last read AI.md: 2026-07-31 (PART 0-6)
 - Current task: PART 0-6 compliance pass (rule files, CLAUDE.md loader, structure/paths/config/mode verification)
 - Relevant PARTs: 0, 1, 2, 3, 4, 5, 6
-- Remaining: `.claude/rules/` files for PART 7+ (binary, backend, api, frontend, features, service, makefile, docker, cicd, testing, optional, config-rules.md PART 12) not yet created — deferred to a follow-up pass once PART 7+ is read
+- Remaining: seven `.claude/rules/` files (binary, backend, api, features, service, makefile, docker, cicd, testing, optional) exist as structural placeholders — filenames/headers/PART mapping are correct but their NEVER/ALWAYS/summary bodies are not yet populated from the PART 7+ content; repopulate each the first time work touches its domain (tracked in TODO.AI.md)

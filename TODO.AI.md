@@ -1,3 +1,34 @@
+## [ ] Preserve YAML comments on config Save (audit finding)
+Read: AI.md PART 5 (YAML Comment Style)
+
+`config.Config.Save` (src/config/config.go) uses `yaml.Marshal`, which drops
+every comment. First-run creation goes through `renderDefaultConfig` (comments
+intact), but any later `Save` (e.g. cluster `_cache` write via
+`Manager.writeCacheLocked`) rewrites the file comment-free, violating the PART 5
+"ALL comments ABOVE the setting" rule for the persisted file. Needs a
+comment-preserving writer (yaml.Node round-trip or a re-render) before the
+first code path that calls `Save` on the human-facing `server.yml` ships. No
+caller writes the human config today (PART 10 deferred), so this is latent.
+
+## [ ] Add ReadTimeout/WriteTimeout to HTTP server (audit finding)
+Read: AI.md PART 8, PART 11
+
+`server.New` (src/server/server.go) sets `ReadHeaderTimeout` and `IdleTimeout`
+but leaves `ReadTimeout` and `WriteTimeout` unset, so a slow-body client can
+hold a connection open (Slowloris-style on the body). Add bounded
+`ReadTimeout`/`WriteTimeout` when the request-handling PARTs (13/14) wire real
+routes and streaming endpoints are known (streaming handlers need per-route
+overrides, so set a sane default now and exempt streams later).
+
+## [ ] Resolve symlinks in SafeFilePath (audit finding)
+Read: AI.md PART 11 (path traversal)
+
+`SafeFilePath` (src/config/path.go) cleans and sandbox-checks the path but does
+not `filepath.EvalSymlinks`, so a symlink inside the sandbox pointing outside it
+would pass. No caller passes attacker-controlled paths yet (upload/file routes
+are PART 16/17, deferred), so this is latent — add symlink resolution before
+the first user-facing file path reaches it.
+
 ## [ ] Populate remaining `.claude/rules/*.md` files with real content
 Read: AI.md PART 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36
 

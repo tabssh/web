@@ -111,14 +111,38 @@ tabssh-cli vault list
 ## Configuration
 
 Configuration lives in `server.yml` (single-instance mode) or the database
-(cluster mode, with `server.yml` as a local cache/backup). Key options:
+(cluster mode, with `server.yml` as a local cache/backup).
 
-| Option | Env Var | Default | Description |
-|--------|---------|---------|-------------|
-| `mode` | `MODE` | `production` | `production` or `development` |
-| `debug` | `DEBUG` | `false` | Verbose logging and diagnostics |
-| `listen_addr` | `LISTEN_ADDR` | `:8080` | HTTP listen address |
-| `database.driver` | `DB_DRIVER` | `sqlite` | `sqlite` or a supported cluster DB |
+### Runtime environment variables
+
+Honored on every start:
+
+| Env Var | Default | Description |
+|---------|---------|-------------|
+| `MODE` | `production` | `production` or `development` |
+| `DEBUG` | `false` | Verbose logging and diagnostics (accepts `1/0`, `yes/no`, `true/false`) |
+| `DOMAIN` | auto | FQDN override (highest priority for hostname resolution) |
+| `TABSSH_PORT` | config value | HTTP port override (below `--port`, above config) |
+| `NO_COLOR` | unset | Disable ANSI color output when set and non-empty |
+| `TERM` | terminal | `TERM=dumb` disables ANSI escapes and forces plain output |
+
+### Init-only environment variables (first run only)
+
+Applied once when `server.yml` is created, then ignored on later starts:
+
+| Env Var | Maps to | Description |
+|---------|---------|-------------|
+| `PORT` | `server.port` | Initial HTTP port (otherwise a random 64xxx port is picked) |
+| `LISTEN` | `server.address` | Initial listen address |
+| `APPLICATION_NAME` | `server.branding.title` | Initial branding title |
+| `APPLICATION_TAGLINE` | `server.branding.tagline` | Initial branding tagline |
+| `CONFIG_DIR` | config directory | Overrides the platform config directory |
+| `DATA_DIR` | data directory | Overrides the platform data directory |
+| `CACHE_DIR` | cache directory | Overrides the platform cache directory |
+| `LOG_DIR` | log directory | Overrides the platform log directory |
+| `DATABASE_DIR` | database directory | Overrides the SQLite database directory |
+| `BACKUP_DIR` | backup directory | Overrides the backup directory |
+| `PID_FILE` | PID file path | Overrides the PID file location |
 
 See the admin panel's Settings page for the full configuration reference.
 
