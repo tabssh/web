@@ -141,6 +141,7 @@ func TestSensitiveSettingClassification(t *testing.T) {
 		"smtp.password", "admin.passwd", "session.secret", "api.token",
 		"ssl.key", "letsencrypt.private_key", "provider.apikey",
 		"db.credential", "sync.passphrase",
+		"ssh.hostkey", "ssl.privatekey", "release.signingkey",
 	}
 	for _, k := range sensitive {
 		if !sensitiveSetting(k) {

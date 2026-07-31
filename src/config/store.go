@@ -188,9 +188,11 @@ func (m *Manager) writeCacheLocked() error {
 // sensitiveSetting reports whether a dotted config key must be excluded from
 // the on-disk cache (credentials NOT cached, per PART 5). The credential
 // words are matched as substrings of the last segment so compound keys such
-// as "secret_key" and "smtp_password" are caught. "key" is matched only as a
-// whole segment or a "_key"/"apikey" suffix so non-credential names that merely
-// contain the letters "key" (for example "seo.keywords") are still cached.
+// as "secret_key" and "smtp_password" are caught. "key" is matched as a
+// segment suffix, which covers "key", "_key", "apikey", "hostkey",
+// "privatekey", and "signingkey" while still caching non-credential names
+// that merely contain the letters "key" mid-word (for example
+// "seo.keywords", which ends in "words", not "key").
 func sensitiveSetting(key string) bool {
 	parts := strings.Split(key, ".")
 	last := strings.ToLower(parts[len(parts)-1])
@@ -199,10 +201,7 @@ func sensitiveSetting(key string) bool {
 			return true
 		}
 	}
-	if last == "key" || strings.HasSuffix(last, "_key") || strings.HasSuffix(last, "apikey") {
-		return true
-	}
-	return false
+	return strings.HasSuffix(last, "key")
 }
 
 // nestSettings converts flat dotted keys ("branding.title") into the nested
